@@ -9,7 +9,7 @@ router.post('/login', loginUser)
 router.post('/resetPassword', resetPassword)
 router.post('/signup', createUser)
 
-// router.use(authenticateJWT);
+router.use(authenticateJWT);
 
 router.get('/', getAllUsers);
 router.get('/:id', getUser)
