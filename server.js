@@ -1,5 +1,5 @@
 const app = require('./app')
-
+require('dotenv').config();
 const server = require('http').createServer(app)
 const io = require('./socket.js').initialize(server);
 

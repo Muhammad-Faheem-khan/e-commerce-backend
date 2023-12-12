@@ -52,7 +52,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         default: 'user',
-      }},
+      },
+      firebaseToken: {
+        type: String,
+        default: ''
+      }
+    },
       {
         timestamps: true 
       })

@@ -8,7 +8,6 @@ exports.authenticateJWT = async (req, res, next) => {
 
         try {
         const authData = jwt.verify(token, process.env.SECRETE_ACCESS_KEY);
-        console.log('authData', authData)
 
         if (!authData) {
             return res.status(403).json({

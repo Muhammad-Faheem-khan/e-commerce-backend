@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const UserToken = require('../models/refreshToken')
-const {verifyRefreshToken }= require('../utilis/verifyRefreshToken')
+const {verifyRefreshToken }= require('../utils/verifyRefreshToken')
 
 const SECRETE_ACCESS_KEY = process.env.SECRETE_ACCESS_KEY;
 
