@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 const socket = require('../socket');
 const { ObjectId } = require('mongodb');
 
-
 exports.getAllOrders = async (req, res) => {
     try {
   

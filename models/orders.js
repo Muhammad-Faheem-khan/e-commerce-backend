@@ -16,11 +16,10 @@ const orderSchema = new mongoose.Schema({
     customerId:{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now
     }
+  },
+  {
+    timestamps: true 
   });
 
   const Order = mongoose.model('Order', orderSchema);

@@ -8,15 +8,10 @@ const paymentSchema = new mongoose.Schema({
     paymentAmount: {
       type: String,
       required: true,
-    },
-    orderId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Order',
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now
     }
+  },
+  {
+    timestamps: true 
   });
 
   const Payment = mongoose.model('Payment', paymentSchema);

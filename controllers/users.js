@@ -1,9 +1,7 @@
 const User = require('../models/user')
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose')
-
-const SECRETE_KEY = process.env.SECRETE_KEY ;
+const {generateToken} = require('../utilis/generateToken')
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -27,10 +25,7 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getUser = async (req, res) => {
     try {
-    //   if (req.user._id.toString() !== req.params.id) {
-    //     return res.status(403).json({ message: 'Access denied.' });
-    //   }
-
+    
     const {id} = req.params
     const user = await User.findById(id);
       if (!user) {
@@ -75,29 +70,34 @@ exports.createUser = async (req, res) => {
 }
 
 exports.loginUser = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (!user) {
-          return res.status(401).json({ message: 'Invalid email or password' });
-        }
-    
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
-        if (!isPasswordMatch) {
-          return res.status(401).json({ message: 'Invalid email or password' });
-        }
-    
-        const token = jwt.sign({ userId: user._id, email: user.email }, SECRETE_KEY );
-      
-        res.json({ token, user });
-      } catch (error) {
-        console.log(error)
-        res.status(500).json({ message: 'An error occurred during login' });
+  try {
+      const { email, password } = req.body;
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(401).json({ message: 'Invalid email or password' });
       }
+  
+      const isPasswordMatch = await bcrypt.compare(password, user.password);
+      if (!isPasswordMatch) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+
+      const { accessToken, refreshToken } = await generateToken(user);
+    
+      res
+      .cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'strict' })
+      .header('Authorization', accessToken)
+      .json({ accessToken, user });
+
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({ message: 'An error occurred during login' });
+    }
 }
 
 exports.updateUser = async (req, res) => {
   try {
+    console.log(req.user._id)
     const userId = req.params.id;
     if (req.user._id.toString() !== userId) {
       return res.status(403).json({ message: 'Access denied.' });
@@ -138,6 +138,7 @@ exports.updateUser = async (req, res) => {
 
     res.status(200).json({ message: 'User profile is updated', user: updatedUser });
   } catch (error) {
+    console.log(error)
     res.status(400).json({ message: error.message });
   }
 };
@@ -189,3 +190,17 @@ exports.resetPassword = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+exports.validateUser = async (userId) =>{
+  try{
+    console.log(userId)
+    const user = await User.findById(userId);
+    if (!user) {
+      return {code : 404 , status: false,  message :'User not found'}
+    }
+      return {code : 200 , status: true , user , message :'User found'}
+  }
+  catch(err){
+    return {code : 500 , status: false , message :'Internal server error'}
+  }
+}

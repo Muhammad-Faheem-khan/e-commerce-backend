@@ -1,13 +1,13 @@
 const express = require('express');
 
-const orderRoutes = require('./orders.js')
-const PaymentRoutes = require('./payment.js')
-const UserRoutes = require('./user.js')
+const unauthRoutes = require('./unAuthRoutes')
+const authRoutes = require('./authRoutes')
+const {authenticateJWT} = require('../middleware/authCheck')
 
 const router = express.Router();
 
-router.use('/api/users', UserRoutes)
-router.use('/api/orders', orderRoutes)
-router.use('/api/payments', PaymentRoutes)
+router.use(unauthRoutes,)
+router.use(authenticateJWT)
+router.use(authRoutes)
 
 module.exports = router

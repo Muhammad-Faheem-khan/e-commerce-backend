@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/user'); 
-
+const { validateUser} = require('../controllers/users')
 exports.authenticateJWT = async (req, res, next) => {
     const bearerHeader = req.headers["authorization"];
     if (typeof bearerHeader !== "undefined") {
@@ -8,22 +7,22 @@ exports.authenticateJWT = async (req, res, next) => {
         const token = bearer[1];
 
         try {
-        const authData = jwt.verify(token, process.env.SECRETE_KEY);
+        const authData = jwt.verify(token, process.env.SECRETE_ACCESS_KEY);
+        console.log('authData', authData)
 
         if (!authData) {
             return res.status(403).json({
             code: "Invalid Token!",
             });
         }
-
-        const user = await User.findById(authData.userId);
-        if (!user) {
+        const data = await validateUser(authData.userId);
+        if (!data.status) {
             return res.status(403).json({
             code: "User not found!",
             });
         }
 
-        req.user = user;
+        req.user = data.user;
         next();
         } catch (error) {
         if (error.name === 'TokenExpiredError') {

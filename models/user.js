@@ -52,13 +52,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         default: 'user',
-      },
-      
-      createdAt: {
-        type: Date,
-        default: Date.now
-      }
-})
+      }},
+      {
+        timestamps: true 
+      })
 
 const User = mongoose.model('User', userSchema)
 
