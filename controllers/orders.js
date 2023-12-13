@@ -2,6 +2,8 @@ const Order = require('../models/orders')
 const Notification = require('../models/notification')
 const mongoose = require('mongoose');
 const socket = require('../socket');
+const {sendEmail }= require('../helper/nodemailer')
+const nodemailer = require('nodemailer')
 const { ObjectId } = require('mongodb');
 
 exports.getAllOrders = async (req, res) => {
@@ -53,23 +55,33 @@ exports.createOrder = async (req, res) => {
       value,
       paymentId,
       customerId
-
     });
+
     await newOrder.save()
 
-    const newNotification = new Notification({
-      type: 'created',
-      description: `New order: ${item}. Value: value`,
-      orderId: newOrder._id
-    })
-    await newNotification.save()
+    // const newNotification = new Notification({
+    //   type: 'created',
+    //   description: `New order: ${item}. Value: value`,
+    //   orderId: newOrder._id
+    // })
+    // await newNotification.save()
     // io.emit('notification');
 
-    socket.io().emit('notification', () => {
-        console.log('notification added')
-      })
+    // socket.io().emit('notification', () => {
+    //     console.log('notification added')
+    //   })
 
-    res.status(200).json(newOrder);
+    let message = {
+      from: '"Fred Foo 👻" <foo@example.com>', // sender address
+      to: "bar@example.com, baz@example.com", // list of receivers
+      subject: "Hello ✔", // Subject line
+      text: "Hello world?", // plain text body
+      html: "<b>Hello world?</b>", // html body
+      }
+      
+      await sendEmail(message, res)   
+
+    // res.status(200).json(newOrder);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
@@ -83,10 +95,16 @@ exports.deleteOrder = async (req, res) => {
       return res.status(400).json({ message: 'Invalid order ID.' });
     }
 
-    const deletedUser = await Order.findByIdAndDelete(orderId);
+    const order = await Order.findOne({ _id: orderId });
 
-    if (!deletedUser) {
-      return res.status(404).json({ message: 'Order not found.' });
+    if (order) {
+      if (req.user._id.toString() !== order.customerId) {
+          return res.status(403).json({ message: 'Access denied.' });
+        }else{
+          await Order.deleteOne({ _id: orderId });
+        }
+    }else{
+        return res.status(404).json({ message: 'order not found.' });
     }
 
     res.status(200).json({ message: 'Order deleted successfully.' });

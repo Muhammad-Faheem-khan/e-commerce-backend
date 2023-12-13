@@ -39,28 +39,28 @@ exports.sendNotification = async (req, res) => {
       }
       
       const user = await User.findById(userId);
-      console.log('user', user)
 
       if(user && user.firebaseToken !== ''){
         const message = {
-            token: user.firebaseToken,
-            data: {
-                title: 'Firebase notification',
-                body: 'Hey there>>>> I am here'
-                }
-            }
-            console.log(message)
-
-          const response = await firebase.messaging().send(message)
-        //   .then((response => {
-        //     res.status(200).json({ message: response });
-        //     console.log('Successfully sent message:', response)
-        //   }))
-          if(response){
-            
-            }else {
+          token: user.firebaseToken,
+          
+          data: {
+             title: 'Order Placed',
+              body: 'Hey there, your order is confirmed.',
+              orderId: '12345',
+              icon: 'https://img.freepik.com/free-photo/3d-render-black-white-hands-holding-red-heart_107791-16650.jpg?size=626&ext=jpg', 
+              click_action: 'https://forwardemail.net/en/login',
+              
+              },
+          };
+          
+          firebase.messaging().send(message)
+          .then((response => {
+            console.log('Successfully sent message:', response)
+            res.status(200).json({ message: response });
+          })).catch((error)=>{
                 console.log('Error sending message:', error);
-                res.status(400).json({ message: response });
-            }
+                res.status(400).json({ message: error.message });
+            })
       }
 }

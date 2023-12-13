@@ -97,7 +97,6 @@ exports.loginUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
-    console.log(req.user._id)
     const userId = req.params.id;
     if (req.user._id.toString() !== userId) {
       return res.status(403).json({ message: 'Access denied.' });
@@ -117,15 +116,16 @@ exports.updateUser = async (req, res) => {
     }
 
     if(req.body.password){
-
       user.password = await bcrypt.hash(req.body.password, 10);
     }
+
     let imgPath = null;
     if (req.file) {
       imgPath = "http://localhost:5000/uploads/" + req.file?.filename 
     }else{
       imgPath = user.img
     }
+
     user.name = req.body.name;
     user.email = req.body.email;
     user.img = imgPath;
@@ -193,7 +193,6 @@ exports.resetPassword = async (req, res) => {
 
 exports.validateUser = async (userId) =>{
   try{
-    console.log(userId)
     const user = await User.findById(userId);
     if (!user) {
       return {code : 404 , status: false,  message :'User not found'}

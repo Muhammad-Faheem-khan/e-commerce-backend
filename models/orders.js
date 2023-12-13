@@ -6,7 +6,7 @@ const orderSchema = new mongoose.Schema({
       required: true
     },
     value: {
-      type: String,
+      type: Number,
       required: true,
     },
     paymentId: {
@@ -14,6 +14,10 @@ const orderSchema = new mongoose.Schema({
       ref: 'Payment',
     },
     customerId:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    sellerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     }

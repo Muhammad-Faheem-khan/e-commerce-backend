@@ -5,7 +5,6 @@ const {verifyRefreshToken }= require('../utils/verifyRefreshToken')
 const SECRETE_ACCESS_KEY = process.env.SECRETE_ACCESS_KEY;
 
 exports.generateAccessToken = async (req, res) => {
-    
     try{
       const {tokenDetails} = await verifyRefreshToken(req.body.refreshToken)
       const userInfo = { userId: tokenDetails.userId, email: tokenDetails.email }
@@ -25,7 +24,7 @@ exports.deleteToken = async (req, res) => {
                 .status(200)
                 .json({ error: false, message: "Logged Out Sucessfully" });
 
-        await userToken.remove();
+        await UserToken.deleteOne({ token: req.body.refreshToken });
         res.status(200).json({ error: false, message: "Logged Out Sucessfully" });
     } catch (err) {
         res.status(500).json({ error: true, message: "Internal Server Error" });
