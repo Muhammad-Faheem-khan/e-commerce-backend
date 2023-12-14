@@ -9,18 +9,3 @@ exports.getAllPayments = async (req, res) => {
   }
 };
 
-exports.createPayment = async (req, res) => {
-  try {
-    const { item, paymentAmount } = req.body
-  
-    const payment = new Payment ({
-      item,
-      paymentAmount,
-    });
-
-    await payment.save()
-    res.status(200).json(payment);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
-  }
-};

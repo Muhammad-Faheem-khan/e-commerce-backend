@@ -1,10 +1,13 @@
 const Order = require('../models/orders')
 const Notification = require('../models/notification')
+const Payment = require('../models/payment')
 const mongoose = require('mongoose');
 const socket = require('../socket');
 const {sendEmail }= require('../helper/nodemailer')
-const nodemailer = require('nodemailer')
 const { ObjectId } = require('mongodb');
+
+const {createPayment} = require('../utils/handlePayment');
+const {sendNotification} = require('../utils/sendFirebaseNotification')
 
 exports.getAllOrders = async (req, res) => {
     try {
@@ -48,16 +51,20 @@ exports.getUserOrders = async (req, res) => {
 
 exports.createOrder = async (req, res) => {
   try {
-    const { item, value, paymentId, customerId } = req.body
-  
+    const { item, value, customerId } = req.body
+
+   const payment =  await createPayment(item, value, res)
+
     const newOrder = new Order ({
       item,
       value,
-      paymentId,
+      paymentId: payment._id,
       customerId
     });
 
     await newOrder.save()
+
+    await sendNotification(customerId, res)
 
     // const newNotification = new Notification({
     //   type: 'created',
@@ -72,16 +79,15 @@ exports.createOrder = async (req, res) => {
     //   })
 
     let message = {
-      from: '"Fred Foo 👻" <foo@example.com>', // sender address
-      to: "bar@example.com, baz@example.com", // list of receivers
-      subject: "Hello ✔", // Subject line
-      text: "Hello world?", // plain text body
-      html: "<b>Hello world?</b>", // html body
+      from: process.env.OWNER_MAIL, 
+      to: "fimukhan79@gmail.com", 
+      subject: "Order Confirmed",
+      text: "Hello world?", 
+      html: "<b>Hello world?</b>", 
       }
       
       await sendEmail(message, res)   
 
-    // res.status(200).json(newOrder);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
