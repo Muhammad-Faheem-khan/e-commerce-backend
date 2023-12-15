@@ -1,10 +1,16 @@
 const mongoose = require('mongoose');
 
 const paymentSchema = new mongoose.Schema({
-    item: {
-      type: String,
-      required: true
+    items: [{
+      productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product',
     },
+    quantity: {
+      type: Number,
+      default: 1
+    }
+  }],
     paymentAmount: {
       type: String,
       required: true,

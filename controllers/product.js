@@ -37,7 +37,6 @@ exports.getProductsBySeller = async (req, res) => {
 
     res.status(200).json(products);
   } catch (error) {
-    console.log(error)
     res.status(404).json({ message: error.message });
   }
 };
@@ -50,7 +49,6 @@ exports.getProduct= async (req, res) => {
   
       res.status(200).json(product);
     } catch (error) {
-      console.log(error)
       res.status(404).json({ message: error.message });
     }
   };
@@ -58,7 +56,7 @@ exports.getProduct= async (req, res) => {
 exports.createproduct = async (req, res) => {
   try {
 
-    if (req.user.role === 'seller') {
+    if (req.user.role !== 'seller') {
         return res.status(403).json({ message: 'Access denied.' });
         }
 
@@ -97,7 +95,6 @@ exports.deleteproduct = async (req, res) => {
     const product = await Product.findOne({ _id: productId });
 
     if (product) {
-        console.log(req.user._id.toString(), product.sellerId.toString() )
       if (req.user._id.toString() !== product.sellerId.toString() ) {
           return res.status(403).json({ message: 'Access denied.' });
         }else{
@@ -109,7 +106,6 @@ exports.deleteproduct = async (req, res) => {
 
     res.status(200).json({ message: 'Product deleted successfully.' });
   } catch (error) {
-    console.log(error)
     res.status(500).json({ message: 'An error occurred while deleting the product.' });
   }
 };
@@ -144,7 +140,6 @@ exports.updateProduct = async (req, res) => {
   
       res.status(200).json({ message: 'Product is updated', product: updatedProduct });
     } catch (error) {
-      console.log(error)
       res.status(400).json({ message: error.message });
     }
   };

@@ -1,13 +1,11 @@
 const Order = require('../models/orders')
-const Notification = require('../models/notification')
-const Payment = require('../models/payment')
+const Product = require('../models/product')
 const mongoose = require('mongoose');
-const socket = require('../socket');
-const {sendEmail }= require('../helper/nodemailer')
 const { ObjectId } = require('mongodb');
 
-const {createPayment} = require('../utils/handlePayment');
-const {sendNotification} = require('../utils/sendFirebaseNotification')
+const {sendEmail }= require('../helper/nodemailer')
+const {createPayment} = require('../helper/handlePayment');
+const {sendNotification} = require('../helper/sendFirebaseNotification')
 
 exports.getAllOrders = async (req, res) => {
     try {
@@ -44,49 +42,48 @@ exports.getUserOrders = async (req, res) => {
 
     res.status(200).json(orders);
   } catch (error) {
-    console.log(error)
     res.status(404).json({ message: error.message });
   }
 };
 
 exports.createOrder = async (req, res) => {
   try {
-    const { item, value, customerId } = req.body
+    const { productsInfo, customerId, totalValue } = req.body
 
-   const payment =  await createPayment(item, value, res)
+    const productIds = productsInfo.map(product => product.productId)
+    const products = await Product.find({_id: productIds})
+    let payment
+    if(products.length>0){
+      payment = await createPayment(productsInfo, totalValue, customerId, res)
+    }else {
+      res.status(404).json({ message: 'Product not exist.'});
+    }
+   
+    if(payment){
+      const newOrder = new Order ({
+        productsInfo,
+        totalValue,
+        paymentId: payment._id,
+        customerId,
+      });
 
-    const newOrder = new Order ({
-      item,
-      value,
-      paymentId: payment._id,
-      customerId
-    });
-
-    await newOrder.save()
-
-    await sendNotification(customerId, res)
-
-    // const newNotification = new Notification({
-    //   type: 'created',
-    //   description: `New order: ${item}. Value: value`,
-    //   orderId: newOrder._id
-    // })
-    // await newNotification.save()
-    // io.emit('notification');
-
-    // socket.io().emit('notification', () => {
-    //     console.log('notification added')
-    //   })
-
-    let message = {
-      from: process.env.OWNER_MAIL, 
-      to: "fimukhan79@gmail.com", 
-      subject: "Order Confirmed",
-      text: "Hello world?", 
-      html: "<b>Hello world?</b>", 
+      await newOrder.save()
+  
+     const createdOrder =  await Order.findById(newOrder._id)
+     .populate('customerId')
+     .populate({
+      path: 'productsInfo',
+      populate: {
+        path: 'productId',
+        model: 'Product'
       }
-      
-      await sendEmail(message, res)   
+    })
+    .lean()
+    .exec();
+
+      await sendNotification(createdOrder, res)
+      await sendEmail(createdOrder, res)  
+    }
 
   } catch (error) {
     res.status(404).json({ message: error.message });

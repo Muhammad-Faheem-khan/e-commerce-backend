@@ -1,7 +1,5 @@
 const User = require('../models/user')
 
-const firebase = require('../firebase')
-
 exports.saveFirebaseToken = async (req, res) => {
     try {
       const userId = req.params.id;
@@ -27,7 +25,6 @@ exports.saveFirebaseToken = async (req, res) => {
   
       res.status(200).json({ message: 'Firebase token is saved'});
     } catch (error) {
-      console.log(error)
       res.status(400).json({ message: error.message });
     }
   };

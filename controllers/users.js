@@ -1,7 +1,7 @@
 const User = require('../models/user')
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose')
-const {generateToken} = require('../utils/generateToken')
+const {generateToken} = require('../helper/generateToken')
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -64,7 +64,6 @@ exports.createUser = async (req, res) => {
       res.status(201).json({ message: 'User registered successfully', user});
 
     }catch(error) {
-      console.log(error)
       res.status(500).json({ message: 'An error occurred while registering the user' });
     }
 }
@@ -90,7 +89,6 @@ exports.loginUser = async (req, res) => {
       .json({ accessToken, user });
 
     } catch (error) {
-      console.log(error)
       res.status(500).json({ message: 'An error occurred during login' });
     }
 }

@@ -1,12 +1,12 @@
 const Payment = require("../models/payment");
 
 
-exports.createPayment = async (item, paymentAmount, res) => {
+exports.createPayment = async (products, totalValue, customerId, res) => {
     try {
 
       const payment = new Payment ({
-        item,
-        paymentAmount,
+        items: products,
+        paymentAmount: totalValue,
       });
   
       await payment.save()
