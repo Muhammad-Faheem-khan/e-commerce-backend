@@ -1,8 +1,8 @@
 const express = require('express');
-const { redirectToCheckout} = require('../controllers/stripe');
+const { redirectToCheckout, redirectToPayment} = require('../controllers/stripe');
 
 const router = express.Router();
 
 router.post("/create-checkout-session", redirectToCheckout)
-
+router.post("/create-intent-payment", redirectToPayment)
 module.exports = router;
